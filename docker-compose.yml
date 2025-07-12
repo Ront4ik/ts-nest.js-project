@@ -1,0 +1,24 @@
+version: '3.8'  # Версия формата docker-compose
+
+services:
+  postgres-db:  # Сервис PostgreSQL
+    image: postgres:15-alpine  # Образ PostgreSQL 15 (облегченная версия Alpine)
+    container_name: linkhub-db  # Имя контейнера
+    restart: unless-stopped  # Автоперезапуск (кроме случаев остановки вручную)
+    environment:  # Переменные окружения
+      POSTGRES_USER: user  # Логин для БД
+      POSTGRES_PASSWORD: password  # Пароль (для прода лучше использовать secrets)
+      POSTGRES_DB: linkhub  # Название БД
+      POSTGRES_HOST_AUTH_METHOD: trust  # Отключает аутентификацию для локальной разработки
+    ports:
+      - "5432:5432"  # Пробрасываем порт 5432 на хост
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Том для хранения данных БД
+    healthcheck:  # Проверка здоровья контейнера
+      test: ["CMD-SHELL", "pg_isready -U user -d linkhub"]  # Проверяет готовность БД
+      interval: 5s  # Проверка каждые 5 секунд
+      timeout: 5s  # Таймаут
+      retries: 5  # Количество попыток
+
+volumes:
+  postgres_data:  # Создаем именованный том для данных
